@@ -3,17 +3,17 @@ import 'dart:async';
 // import 'package:dio/dio.dart';
 
 import 'package:dio/dio.dart';
+
+// ignore: depend_on_referenced_packages
+import 'package:meta/meta.dart';
 import 'package:testapp/data_source/data_api.codegen.dart';
-import 'package:testapp/generated/data_source/define.g.dart';
+import 'package:testapp/generated/define.g.dart';
 import 'package:testapp/repository/data_repository.dart';
 
 import 'model.dart';
-// // ignore: uri_does_not_exist
-// if (dart.library.html) 'package:chatapp/src/feature/dependencies/initialization/platform/initialization_js.dart';
-// import 'package:l/l.dart';
-import 'package:meta/meta.dart';
 
 typedef _InitializationStep = FutureOr<void> Function(
+    // ignore: require_trailing_commas
     $MutableDependencies dependencies);
 
 class $MutableDependencies implements Dependencies {
@@ -33,7 +33,7 @@ mixin InitializeDependencies {
   /// Initializes the app and returns a [Dependencies] object
   @protected
   Future<Dependencies> $initializeDependencies({
-    void Function(int progress, String message)? onProgress,
+    final void Function(int progress, String message)? onProgress,
   }) async {
     final steps = _initializationSteps;
     final dependencies = $MutableDependencies();
@@ -46,17 +46,18 @@ mixin InitializeDependencies {
       // l.v6('Initialization | $currentStep/$totalSteps ($percent%) | "${step.key}"');
       await step.value(dependencies);
     }
+
     return dependencies;
   }
 
   final Map<String, _InitializationStep> _initializationSteps =
       <String, _InitializationStep>{
-    'Dio initialization': (dependencies) {
+    'Dio initialization': (final dependencies) {
       final dio =
           Dio(BaseOptions(baseUrl: 'https://${AppEnvironment.baseUrl}/'));
       dependencies.dio = dio;
     },
-    'User Repository initialization': (dependencies) =>
+    'User Repository initialization': (final dependencies) =>
         dependencies.dataRepository = DataRepository(
           DataApi(
             dependencies.dio,

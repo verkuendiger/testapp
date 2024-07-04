@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:l/l.dart';
+// ignore: depend_on_referenced_packages
 import 'package:stack_trace/stack_trace.dart';
 
 extension on LogLevel {
@@ -15,15 +16,15 @@ extension on LogLevel {
 }
 
 class L {
-  static void i(Object message) => l.i(message);
+  static void i(final Object message) => l.i(message);
 
-  static void w(Object message, [StackTrace? stackTrace]) =>
+  static void w(final Object message, [final StackTrace? stackTrace]) =>
       l.w(message, stackTrace);
 
-  static void e(Object message, [StackTrace? stackTrace]) =>
+  static void e(final Object message, [final StackTrace? stackTrace]) =>
       l.e(message, stackTrace);
 
-  static void d(Object message) => l.d(message);
+  static void d(final Object message) => l.d(message);
 
   /// How much digits there should be in the time
   static const int timeLength = 2;
@@ -34,15 +35,15 @@ class L {
     messageFormatting: _formatLoggerMessage,
   );
 
-  /// Formats the time to have [_timeLength] digits
-  static String timeFormat(int input) =>
+  /// Formats the time to have [timeLength] digits
+  static String timeFormat(final int input) =>
       input.toString().padLeft(timeLength, '0');
 
   /// Formats the message for the [L] library
   static String _formatLoggerMessage(
-    Object message,
-    LogLevel logLevel,
-    DateTime now,
+    final Object message,
+    final LogLevel logLevel,
+    final DateTime now,
   ) =>
       '${logLevel.emoji} $now | $message';
 
@@ -53,9 +54,9 @@ class L {
   ///
   /// Builds error through [StringBuffer] and returns it.
   static String _formatError(
-    String type,
-    String error,
-    StackTrace? stackTrace,
+    final String type,
+    final String error,
+    final StackTrace? stackTrace,
   ) {
     final StackTrace trace = stackTrace ?? StackTrace.current;
 
@@ -72,15 +73,15 @@ class L {
   ///
   /// later, it would be send to the sentry
   static void logZoneError(
-    Object? e,
-    StackTrace s,
+    final Object? e,
+    final StackTrace s,
   ) =>
       l.e(_formatError('Top-level', e.toString(), s), s);
 
   /// Helper static method to log a flutter error [FlutterError.onError]
   /// like widget overflow, etc.
   static void logFlutterError(
-    FlutterErrorDetails details,
+    final FlutterErrorDetails details,
   ) =>
       l.e(
         _formatError('Flutter', details.exceptionAsString(), details.stack),
@@ -90,7 +91,9 @@ class L {
   /// Helper static method to log a platform dispatcher error
   /// like native code errors
   static bool logPlatformDispatcherError(
-      Object exception, StackTrace stackTrace,) {
+    final Object exception,
+    final StackTrace stackTrace,
+  ) {
     l.e(
       _formatError('PlatformDispatcher', exception.toString(), stackTrace),
       stackTrace,
@@ -99,5 +102,6 @@ class L {
   }
 
   /// run in a zone
-  static T runLogging<T>(T Function() body) => l.capture(body, _logOptions);
+  static T runLogging<T>(final T Function() body) =>
+      l.capture(body, _logOptions);
 }

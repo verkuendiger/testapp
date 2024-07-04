@@ -9,12 +9,10 @@ extension BlocScope on BuildContext {
 extension StringX on String {
   // String get capitalized => '${this[0].toUpperCase()}${substring(1)}';
 
-  String get capitalized {
-    return split('\n').map((line) {
-      if (line.isEmpty) {
-        return line;
-      }
-      return '${line[0].toUpperCase()}${line.substring(1)}';
-    }).join('\n');
-  }
+  String get capitalized => split('\n').map((final line) {
+        if (line.isEmpty) {
+          return line;
+        }
+        return '${line[0].toUpperCase()}${line.substring(1)}';
+      }).join('\n');
 }

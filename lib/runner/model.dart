@@ -5,7 +5,7 @@ import 'package:testapp/repository/data_repository.dart';
 import 'dependencies_scope.dart';
 
 abstract interface class Dependencies {
-  factory Dependencies.of(BuildContext context) =>
+  factory Dependencies.of(final BuildContext context) =>
       InheritedDependencies.of(context);
 
   abstract final Dio dio;

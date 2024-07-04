@@ -19,9 +19,11 @@ class DependenciesScope extends StatelessWidget {
   /// The state from the closest instance of this class
   /// that encloses the given context, if any.
   /// e.g. `DependenciesScope.maybeOf(context)`.
-  static Dependencies? maybeOf(BuildContext context) =>
-      switch (context.getElementForInheritedWidgetOfExactType<InheritedDependencies>()?.widget) {
-        final InheritedDependencies inheritedDependencies => inheritedDependencies.dependencies,
+  static Dependencies? maybeOf(final BuildContext context) => switch (context
+          .getElementForInheritedWidgetOfExactType<InheritedDependencies>()
+          ?.widget) {
+        final InheritedDependencies inheritedDependencies =>
+          inheritedDependencies.dependencies,
         _ => null,
       };
 
@@ -34,7 +36,8 @@ class DependenciesScope extends StatelessWidget {
   /// The state from the closest instance of this class
   /// that encloses the given context.
   /// e.g. `DependenciesScope.of(context)`
-  static Dependencies of(BuildContext context) => maybeOf(context) ?? _notFoundInheritedWidgetOfExactType();
+  static Dependencies of(final BuildContext context) =>
+      maybeOf(context) ?? _notFoundInheritedWidgetOfExactType();
 
   /// Initialization of the dependencies.
   final Future<Dependencies> initialization;
@@ -49,10 +52,12 @@ class DependenciesScope extends StatelessWidget {
   final Widget child;
 
   @override
-  Widget build(BuildContext context) => FutureBuilder<Dependencies>(
+  Widget build(final BuildContext context) => FutureBuilder<Dependencies>(
         future: initialization,
-        builder: (context, snapshot) => switch ((snapshot.data, snapshot.error, snapshot.stackTrace)) {
-          (final Dependencies dependencies, null, null) => InheritedDependencies(
+        builder: (final context, final snapshot) =>
+            switch ((snapshot.data, snapshot.error, snapshot.stackTrace)) {
+          (final Dependencies dependencies, null, null) =>
+            InheritedDependencies(
               dependencies: dependencies,
               child: child,
             ),
@@ -79,9 +84,10 @@ class InheritedDependencies extends InheritedWidget {
   /// The state from the closest instance of this class
   /// that encloses the given context, if any.
   /// e.g. `InheritedDependencies.maybeOf(context)`.
-  static Dependencies? maybeOf(BuildContext context) =>
-      (context.getElementForInheritedWidgetOfExactType<InheritedDependencies>()?.widget as InheritedDependencies?)
-          ?.dependencies;
+  static Dependencies? maybeOf(final BuildContext context) => (context
+          .getElementForInheritedWidgetOfExactType<InheritedDependencies>()
+          ?.widget as InheritedDependencies?)
+      ?.dependencies;
 
   static Never _notFoundInheritedWidgetOfExactType() => throw ArgumentError(
         'Out of scope, not found inherited widget '
@@ -92,8 +98,10 @@ class InheritedDependencies extends InheritedWidget {
   /// The state from the closest instance of this class
   /// that encloses the given context.
   /// e.g. `InheritedDependencies.of(context)`
-  static Dependencies of(BuildContext context) => maybeOf(context) ?? _notFoundInheritedWidgetOfExactType();
+  static Dependencies of(final BuildContext context) =>
+      maybeOf(context) ?? _notFoundInheritedWidgetOfExactType();
 
   @override
-  bool updateShouldNotify(covariant InheritedDependencies oldWidget) => false;
+  bool updateShouldNotify(covariant final InheritedDependencies oldWidget) =>
+      false;
 }

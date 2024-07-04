@@ -1,22 +1,17 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart'
+    show ChangeNotifier, FlutterError, PlatformDispatcher, ValueListenable;
+import 'package:flutter/services.dart' show DeviceOrientation, SystemChrome;
+import 'package:flutter/widgets.dart'
+    show WidgetsBinding, WidgetsFlutterBinding;
 // import 'package:chatapp/src/common/util/error_util.dart';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:l/l.dart';
 import 'package:testapp/common/bloc_observer.dart';
 
 import 'initialize_dependencies.dart';
-import 'package:flutter/foundation.dart'
-    show
-        ChangeNotifier,
-        FlutterError,
-        PlatformDispatcher,
-        ValueListenable,
-        kDebugMode;
-import 'package:flutter/services.dart' show SystemChrome, DeviceOrientation;
-import 'package:flutter/widgets.dart'
-    show WidgetsBinding, WidgetsFlutterBinding;
-
 import 'model.dart';
 
 typedef InitializationProgressTuple = ({int progress, String message});
@@ -38,16 +33,16 @@ class InitializationExecutor
 
   /// Initializes the app and prepares it for use.
   Future<Dependencies> call({
-    bool deferFirstFrame = false,
-    List<DeviceOrientation>? orientations,
-    void Function(int progress, String message)? onProgress,
-    void Function(Dependencies dependencies)? onSuccess,
-    void Function(Object error, StackTrace stackTrace)? onError,
+    final bool deferFirstFrame = false,
+    final List<DeviceOrientation>? orientations,
+    final void Function(int progress, String message)? onProgress,
+    final void Function(Dependencies dependencies)? onSuccess,
+    final void Function(Object error, StackTrace stackTrace)? onError,
   }) =>
       _$currentInitialization ??= Future<Dependencies>(() async {
         late final WidgetsBinding binding;
         final stopwatch = Stopwatch()..start();
-        void notifyProgress(int progress, String message) {
+        void notifyProgress(final int progress, final String message) {
           _value = (progress: progress.clamp(0, 100), message: message);
           onProgress?.call(_value.progress, _value.message);
           notifyListeners();
@@ -61,8 +56,9 @@ class InitializationExecutor
 
           if (deferFirstFrame) binding.deferFirstFrame();
           await _catchExceptions();
-          if (orientations != null)
+          if (orientations != null) {
             await SystemChrome.setPreferredOrientations(orientations);
+          }
           final dependencies =
               await $initializeDependencies(onProgress: notifyProgress)
                   .timeout(const Duration(minutes: 5));
@@ -75,10 +71,9 @@ class InitializationExecutor
           rethrow;
         } finally {
           stopwatch.stop();
-          binding.addPostFrameCallback((_) {
+          binding.addPostFrameCallback((final _) {
             // Closes splash screen, and show the app layout.
             if (deferFirstFrame) binding.allowFirstFrame();
-            //final context = binding.renderViewElement;
           });
           _$currentInitialization = null;
         }
@@ -86,30 +81,21 @@ class InitializationExecutor
 
   Future<void> _catchExceptions() async {
     try {
-      PlatformDispatcher.instance.onError = (error, stackTrace) {
-        print(error);
-        // ErrorUtil.logError(
-        //   error,
-        //   stackTrace,
-        //   hint: 'ROOT | ${Error.safeToString(error)}',
-        // ).ignore();
+      PlatformDispatcher.instance.onError = (final error, final stackTrace) {
+        l.e(error, stackTrace);
+
         return true;
       };
 
       final sourceFlutterError = FlutterError.onError;
       FlutterError.onError = (final details) {
-        print(details);
-        // ErrorUtil.logError(
-        //   details.exception,
-        //   details.stack ?? StackTrace.current,
-        //   hint: 'FLUTTER ERROR\r\n$details',
-        // ).ignore();
-        // FlutterError.presentError(details);
+        l.e(details.exception, details.stack ?? StackTrace.current);
+        FlutterError.presentError(details);
+
         sourceFlutterError?.call(details);
       };
-    } on Object catch (error) {
-      print(error);
-      // ErrorUtil.logError(error, stackTrace).ignore();
+    } on Object catch (error, stacktrace) {
+      l.e(error, stacktrace);
     }
   }
 }

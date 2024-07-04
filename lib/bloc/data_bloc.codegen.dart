@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:bloc_concurrency/bloc_concurrency.dart' as bloc_concurrency;
-import 'package:dio/dio.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:testapp/data_source/data_api.codegen.dart';
@@ -21,27 +20,27 @@ sealed class DataBlocState with _$DataBlocState {
   const factory DataBlocState.processing() = DataBlocStateProcessing;
 
   const factory DataBlocState.successFetchPosts({
-    required List<PostInfo> posts,
-    required List<PhotosInfo> photos,
-    Map<int, List<CommentInfo>>? comments,
+    required final List<PostInfo> posts,
+    required final List<PhotosInfo> photos,
+    final Map<int, List<CommentInfo>>? comments,
   }) = DataBlocStateSuccessFetchPosts;
 
   const factory DataBlocState.failure({
-    @Default('Неизвестная ошибка') String errorMessage,
+    @Default('Неизвестная ошибка') final String errorMessage,
   }) = DataBlocStateFailure;
 }
 
 @freezed
 sealed class DataBlocEvent with _$DataBlocEvent {
   @literal
-  const factory DataBlocEvent.fetchPostComments({required int id}) =
+  const factory DataBlocEvent.fetchPostComments({required final int id}) =
       FetchPostComments;
 
   const factory DataBlocEvent.fetchPosts() = FetchPosts;
 }
 
 class DataBloc extends Bloc<_Event, _State> {
-  DataBloc({required IDataRepository dataRepository})
+  DataBloc({required final IDataRepository dataRepository})
       : _dataRepository = dataRepository,
         super(const _State.none()) {
     on<_Event>(_handler, transformer: bloc_concurrency.droppable());
@@ -49,14 +48,14 @@ class DataBloc extends Bloc<_Event, _State> {
 
   final IDataRepository _dataRepository;
 
-  _EventHandler get _handler => (event, emit) => switch (event) {
+  _EventHandler get _handler => (final event, final emit) => switch (event) {
         FetchPostComments() => _handleFetchPostComments(event, emit),
         FetchPosts() => _handleFetchPosts(event, emit),
       };
 
   Future<void> _handleFetchPostComments(
-    FetchPostComments event,
-    _Emitter emit,
+    final FetchPostComments event,
+    final _Emitter emit,
   ) async {
     try {
       final curState = state as DataBlocStateSuccessFetchPosts;
@@ -71,30 +70,33 @@ class DataBloc extends Bloc<_Event, _State> {
       if (curState.comments == null) {
         comments = {event.id: postComments};
       } else {
-        comments = Map.from(curState.comments!);
-        comments.addAll({event.id: postComments});
+        comments = Map.from(curState.comments!)
+          ..addAll({event.id: postComments});
       }
 
-      emit(DataBlocState.successFetchPosts(
-          posts: curState.posts, photos: curState.photos, comments: comments));
-    } catch (e) {
-      if (e is DioException && e.response?.statusCode == 404) {
-        emit(const DataBlocState.failure(
-            errorMessage: 'Пользователь не найден'));
-      } else {
-        emit(const DataBlocState.failure());
-      }
+      emit(
+        DataBlocState.successFetchPosts(
+          posts: curState.posts,
+          photos: curState.photos,
+          comments: comments,
+        ),
+      );
+    } on Object catch (_) {
+      emit(const DataBlocState.failure());
       rethrow;
     }
   }
 
-  Future<void> _handleFetchPosts(FetchPosts event, _Emitter emit) async {
+  Future<void> _handleFetchPosts(
+    final FetchPosts event,
+    final _Emitter emit,
+  ) async {
     emit(const DataBlocState.processing());
     try {
       final posts = await _dataRepository.fetchPostsInfo();
       final photos = await _dataRepository.fetchPhotosInfo();
       emit(DataBlocState.successFetchPosts(posts: posts, photos: photos));
-    } catch (e) {
+    } on Object catch (_) {
       emit(const DataBlocState.failure());
       rethrow;
     }
